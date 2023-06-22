@@ -1,7 +1,6 @@
-function handleMessage(request, sender, sendResponse) {
+async function handleMessage(request, sender, sendResponse) {
   console.log("Handle Message Running!");
-  const code = request.code;
-  console.log(code);  
+  console.log(request);  
 }
 
 console.log("Script Running");
