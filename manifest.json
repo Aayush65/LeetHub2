@@ -1,0 +1,22 @@
+{
+  "name": "LeetHub2.0",
+  "version": "2.0",
+  "author": "Aayush Gupta",
+  "description": "A Chrome extension that tracks correct submissions on LeetCode and uploads them on Github.",
+  "manifest_version": 3,
+  "permissions": ["webRequest"],
+  "host_permissions": ["https://leetcode.com/problems/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://leetcode.com/problems/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
