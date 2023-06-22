@@ -17,8 +17,8 @@ function handleSubmitButtonClick() {
     if (success) { 
       console.log("Success!");
       console.log(window.location.href);
-      console.log(document.getElementsByTagName("code")[0].innerHTML);
-      
+      console.log(document.getElementsByTagName("code")[0].innerText);
+       chrome.runtime.sendMessage({code: document.getElementsByTagName("code")[0].innerText});
       clearInterval(checkingForSuccess);
       return;
     }
