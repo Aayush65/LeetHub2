@@ -1,5 +1,3 @@
-const details = {};
-
 function waitForRendering(query, fnWhenRendered) {
 	const observer = new MutationObserver(function (mutations, mutationInstance) {
 		const targetDiv = document.querySelector(query);
