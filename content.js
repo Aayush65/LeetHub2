@@ -20,15 +20,6 @@ function pageRendered(submitButton) {
 	submitButton.addEventListener("click", handleSubmitButtonClick);
 }
 
-function mainPageOpened(desc) {
-	console.log("Main Page Opened");
-	details.probDesc = desc.innerText;
-
-	const [probNo, probName] = document.querySelector("#qd-content > div.h-full.flex-col.ssg__qd-splitter-primary-w > div > div > div > div.flex.h-full.w-full.overflow-y-auto.rounded-b > div > div > div.w-full.px-5.pt-5 > div > div:nth-child(1) > div.flex-1 > div > span").innerText.split('. ');
-	details.probNo = probNo;
-	details.probName = probName;
-}
-
 function handleSubmitButtonClick() {
 	console.log("Button Clicked!");
 	let iteration = 0;
@@ -49,31 +40,35 @@ function handleSubmitButtonClick() {
 	}, 1000)
 }
 
-function sendDetails() {
-	// Code
-	details.code = document.getElementsByTagName("code")[0].innerText;
-
-	// code language
-	details.lang = document.querySelector("#qd-content > div.h-full.flex-col.ssg__qd-splitter-secondary-w > div > div.min-h-0.flex-grow > div > div.flex.h-full.w-full.flex-col.overflow-hidden.rounded > div.bg-layer-1.dark\\:bg-dark-layer-1.flex.h-full.w-full.flex-col.overflow-auto.rounded-b.p-5 > div:nth-child(2) > span").innerText;
-
+async function sendDetails() {
 	// submission id
 	const regex = /\/submissions\/(\d+)\//;
-	const matches = regex.exec(window.location.href);
-	if (matches && matches.length > 1)
-		details.submissionId = matches[1]
-	
-	// runtime
-	details.runtime = document.querySelector("#qd-content > div.h-full.flex-col.ssg__qd-splitter-secondary-w > div > div.min-h-0.flex-grow > div > div.flex.h-full.w-full.flex-col.overflow-hidden.rounded > div.bg-layer-1.dark\\:bg-dark-layer-1.flex.h-full.w-full.flex-col.overflow-auto.rounded-b.p-5 > div.flex.w-full.pb-4 > div:nth-child(1) > div.flex.items-center.justify-between.gap-4.flex-wrap.gap-y-2 > div:nth-child(1) > span.text-label-1.dark\\:text-dark-label-1.ml-2.font-medium").innerText;
+	const submissionId = regex.exec(window.location.href)[1];
 
-	// memory
-	details.memory = document.querySelector("#qd-content > div.h-full.flex-col.ssg__qd-splitter-secondary-w > div > div.min-h-0.flex-grow > div > div.flex.h-full.w-full.flex-col.overflow-hidden.rounded > div.bg-layer-1.dark\\:bg-dark-layer-1.flex.h-full.w-full.flex-col.overflow-auto.rounded-b.p-5 > div.flex.w-full.pb-4 > div:nth-child(2) > div.flex.items-center.justify-between.gap-4.flex-wrap.gap-y-2 > div:nth-child(1) > span.text-label-1.dark\\:text-dark-label-1.ml-2.font-medium").innerText;
+	// fetching submission details from graphql
+	const submissionDetailsQuery = {
+		query:
+		  '\n    query submissionDetails($submissionId: Int!) {\n  submissionDetails(submissionId: $submissionId) {\n    runtime\n    runtimeDisplay\n    runtimePercentile\n    runtimeDistribution\n    memory\n    memoryDisplay\n    memoryPercentile\n    memoryDistribution\n    code\n    timestamp\n    statusCode\n    lang {\n      name\n      verboseName\n    }\n    question {\n      questionId\n    title\n    titleSlug\n    content\n    difficulty\n    }\n    notes\n    topicTags {\n      tagId\n      slug\n      name\n    }\n    runtimeError\n  }\n}\n    ',
+		variables: { submissionId: submissionId },
+		operationName: 'submissionDetails',
+	  };
+
+	const method = {
+		method: 'POST',
+		headers: {
+		  cookie: document.cookie, // required to authorize the API request
+		  'content-type': 'application/json',
+		},
+		body: JSON.stringify(submissionDetailsQuery),
+	  };
+
+	const data = await fetch('https://leetcode.com/graphql/', options)
+	  .then(res => res.json())
+	  .then(res => res.data.submissionDetails);
 
 	// send all details
-	chrome.runtime.sendMessage(details); 
-	return details;
+	chrome.runtime.sendMessage(data); 
+	return data;
 }
 
-
-
 waitForRendering('[data-e2e-locator="console-submit-button"]', pageRendered);
-waitForRendering("#qd-content > div.h-full.flex-col.ssg__qd-splitter-primary-w > div > div > div > div.flex.h-full.w-full.overflow-y-auto.rounded-b > div > div > div.px-5.pt-4 > div", mainPageOpened);
