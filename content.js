@@ -62,7 +62,7 @@ async function sendDetails() {
 		body: JSON.stringify(submissionDetailsQuery),
 	  };
 
-	const data = await fetch('https://leetcode.com/graphql/', options)
+	const data = await fetch('https://leetcode.com/graphql/', method)
 	  .then(res => res.json())
 	  .then(res => res.data.submissionDetails);
 
