@@ -23,7 +23,10 @@ function pageRendered(submitButton) {
 function mainPageOpened(desc) {
 	console.log("Main Page Opened");
 	details.probDesc = desc.innerText;
-	console.log(desc.innerText);
+
+	const [probNo, probName] = document.querySelector("#qd-content > div.h-full.flex-col.ssg__qd-splitter-primary-w > div > div > div > div.flex.h-full.w-full.overflow-y-auto.rounded-b > div > div > div.w-full.px-5.pt-5 > div > div:nth-child(1) > div.flex-1 > div > span").innerText.split('. ');
+	details.probNo = probNo;
+	details.probName = probName;
 }
 
 function handleSubmitButtonClick() {
