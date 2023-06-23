@@ -1,6 +1,29 @@
+const details = {};
+
+function waitForRendering(query, fnWhenRendered) {
+	const observer = new MutationObserver(function (mutations, mutationInstance) {
+		const targetDiv = document.querySelector(query);
+		if (targetDiv) {
+			fnWhenRendered(targetDiv);
+			mutationInstance.disconnect();
+		}
+	});
+	
+	observer.observe(document, {
+		childList: true,
+		subtree: true
+	});
+}
+
 function pageRendered(submitButton) {
 	console.log("Page Rendered");
 	submitButton.addEventListener("click", handleSubmitButtonClick);
+}
+
+function mainPageOpened(desc) {
+	console.log("Main Page Opened");
+	details.probDesc = desc.innerText;
+	console.log(desc.innerText);
 }
 
 function handleSubmitButtonClick() {
@@ -24,37 +47,30 @@ function handleSubmitButtonClick() {
 }
 
 function sendDetails() {
-	details = {};
-	
-	// send Code
+	// Code
 	details.code = document.getElementsByTagName("code")[0].innerText;
 
-	// send code language
+	// code language
 	details.lang = document.querySelector("#qd-content > div.h-full.flex-col.ssg__qd-splitter-secondary-w > div > div.min-h-0.flex-grow > div > div.flex.h-full.w-full.flex-col.overflow-hidden.rounded > div.bg-layer-1.dark\\:bg-dark-layer-1.flex.h-full.w-full.flex-col.overflow-auto.rounded-b.p-5 > div:nth-child(2) > span").innerText;
 
-	// send submission id
+	// submission id
 	const regex = /\/submissions\/(\d+)\//;
 	const matches = regex.exec(window.location.href);
 	if (matches && matches.length > 1)
 		details.submissionId = matches[1]
-		
+	
+	// runtime
+	details.runtime = document.querySelector("#qd-content > div.h-full.flex-col.ssg__qd-splitter-secondary-w > div > div.min-h-0.flex-grow > div > div.flex.h-full.w-full.flex-col.overflow-hidden.rounded > div.bg-layer-1.dark\\:bg-dark-layer-1.flex.h-full.w-full.flex-col.overflow-auto.rounded-b.p-5 > div.flex.w-full.pb-4 > div:nth-child(1) > div.flex.items-center.justify-between.gap-4.flex-wrap.gap-y-2 > div:nth-child(1) > span.text-label-1.dark\\:text-dark-label-1.ml-2.font-medium").innerText;
+
+	// memory
+	details.memory = document.querySelector("#qd-content > div.h-full.flex-col.ssg__qd-splitter-secondary-w > div > div.min-h-0.flex-grow > div > div.flex.h-full.w-full.flex-col.overflow-hidden.rounded > div.bg-layer-1.dark\\:bg-dark-layer-1.flex.h-full.w-full.flex-col.overflow-auto.rounded-b.p-5 > div.flex.w-full.pb-4 > div:nth-child(2) > div.flex.items-center.justify-between.gap-4.flex-wrap.gap-y-2 > div:nth-child(1) > span.text-label-1.dark\\:text-dark-label-1.ml-2.font-medium").innerText;
+
 	// send all details
 	chrome.runtime.sendMessage(details); 
 	return details;
 }
 
 
-// All the code below this waits for the proper rendering of the page
-const observer = new MutationObserver(function (mutations, mutationInstance) {
-	// const submitButton = document.querySelector('[data-e2e-locator="console-run-button"]');
-	const submitButton = document.querySelector('[data-e2e-locator="console-submit-button"]');
-	if (submitButton) {
-		pageRendered(submitButton);
-		mutationInstance.disconnect();
-	}
-});
 
-observer.observe(document, {
-	childList: true,
-	subtree: true
-});
+waitForRendering('[data-e2e-locator="console-submit-button"]', pageRendered);
+waitForRendering("#qd-content > div.h-full.flex-col.ssg__qd-splitter-primary-w > div > div > div > div.flex.h-full.w-full.overflow-y-auto.rounded-b > div > div > div.px-5.pt-4 > div", mainPageOpened);
